@@ -38,10 +38,10 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 // 启动本地activity
-//                startActivity(new Intent(MainActivity.this, SecondActivity.class));
+                startActivity(new Intent(MainActivity.this, SecondActivity.class));
                 // 启动插件activity
-                PluginPackage pluginPackage = ((App)getApplication()).getPluginPackage();
-                PluginManager.getInstance(MainActivity.this).startPluginActivity(MainActivity.this, pluginPackage.packageInfo.packageName, "com.sample.plugina.MainActivity");
+//                PluginPackage pluginPackage = ((App)getApplication()).getPluginPackage();
+//                PluginManager.getInstance(MainActivity.this).startPluginActivity(MainActivity.this, pluginPackage.packageInfo.packageName, "com.sample.plugina.MainActivity");
             }
         });
     }
