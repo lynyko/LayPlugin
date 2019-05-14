@@ -8,13 +8,13 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lay.pluge.pluginlib.Patch;
 import com.lay.pluge.pluginlib.PluginManager;
 import com.lay.pluge.pluginlib.PluginPackage;
 
@@ -30,14 +30,18 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
+        }
         findViewById(android.R.id.content).setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
-                String dexPath = Environment.getExternalStorageDirectory() + "/plugina-debug.apk";
-                PluginManager pluginManager = PluginManager.getInstance(getApplicationContext());
-                PluginPackage pluginPackage = pluginManager.loadApk(dexPath);
-                pluginManager.startPluginActivity(pluginPackage.packageInfo.packageName, "com.sample.plugina.MainActivity");
+                // 启动本地activity
+//                startActivity(new Intent(MainActivity.this, SecondActivity.class));
+                // 启动插件activity
+                PluginPackage pluginPackage = ((App)getApplication()).getPluginPackage();
+                PluginManager.getInstance(MainActivity.this).startPluginActivity(MainActivity.this, pluginPackage.packageInfo.packageName, "com.sample.plugina.MainActivity");
             }
         });
     }

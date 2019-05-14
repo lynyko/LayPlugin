@@ -6,6 +6,7 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:name=".App"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -18,7 +19,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.lay.pluge.pluginlib.PluginProxyActivity"/>
+        <activity android:name=".SecondActivity"/>
     </application>
 
 </manifest>
