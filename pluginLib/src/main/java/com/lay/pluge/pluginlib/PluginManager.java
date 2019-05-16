@@ -18,10 +18,12 @@ import dalvik.system.DexClassLoader;
 public class PluginManager {
     Context mContext;
     private static PluginManager pluginManager = null;
+    private ClassLoader bottomClassLoader = null;
     private Map<String, PluginPackage> packageMap = new HashMap<>();
 
     private PluginManager(Context context){
         mContext = context;
+        bottomClassLoader = mContext.getClassLoader();
     }
 
     public static PluginManager getInstance(Context context){
@@ -36,11 +38,12 @@ public class PluginManager {
     }
 
     public PluginPackage loadApk(String path){
-        PackageInfo packageInfo = mContext.getPackageManager().getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES);
+        PackageInfo packageInfo = mContext.getPackageManager().getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
 
         String dexPath = mContext.getDir("plugin", Context.MODE_PRIVATE).getAbsolutePath();
-        DexClassLoader dexClassLoader = new DexClassLoader(path, dexPath, null, mContext.getClassLoader().getParent());
-        hook(mContext.getClassLoader(), dexClassLoader);
+        ClassLoader dexClassLoader = new DexClassLoader(path, dexPath, null, bottomClassLoader);
+        ClassLoader patchClassLoader = new PatchClassLoader(dexClassLoader);
+        insertParentClassLoader(mContext.getClassLoader(), patchClassLoader);
         AssetManager assetManager = createAssetManager(path);
         Resources resources = new Resources(assetManager, mContext.getResources().getDisplayMetrics(),
                 mContext.getResources().getConfiguration());
@@ -49,7 +52,32 @@ public class PluginManager {
         return pluginPackage;
     }
 
-    public void hook(ClassLoader pathClassLoader, ClassLoader dexClassLoader){
+    class PatchClassLoader extends ClassLoader {
+        ClassLoader dexClassLoader;
+        Method findClassMethod;
+        public PatchClassLoader(ClassLoader dexClassLoader){
+            this.dexClassLoader = dexClassLoader;
+            try {
+                findClassMethod = ClassLoader.class.getDeclaredMethod("findClass", String.class);
+                findClassMethod.setAccessible(true);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public Class<?> findClass(String name) {
+            try {
+                Object obj = findClassMethod.invoke(dexClassLoader, name);
+                return (Class)obj;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    public void insertParentClassLoader(ClassLoader pathClassLoader, ClassLoader dexClassLoader){
+        ClassLoader parentClassLoader = pathClassLoader.getParent();
         Class clz = pathClassLoader.getClass().getSuperclass();
         while(clz != ClassLoader.class) {
             clz = clz.getSuperclass();
@@ -58,6 +86,8 @@ public class PluginManager {
             Field parent = clz.getDeclaredField("parent");
             parent.setAccessible(true);
             parent.set(pathClassLoader, dexClassLoader);
+
+            parent.set(dexClassLoader, parentClassLoader);
         } catch (Exception e) {
             e.printStackTrace();
         }
