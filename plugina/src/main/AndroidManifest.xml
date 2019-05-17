@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sample.plugina">
+    <application>
+        <meta-data android:name="preload"
+            android:value="com.sample.plugina.PatchPluginA"/>
+        <meta-data android:name="default"
+            android:value="com.sample.plugina.MainActivity"/>
+    </application>
 </manifest>

@@ -9,11 +9,13 @@ import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lay.pluge.pluginlib.Constans;
 import com.lay.pluge.pluginlib.Patch;
 import com.lay.pluge.pluginlib.PluginManager;
 import com.lay.pluge.pluginlib.PluginPackage;
@@ -38,10 +40,13 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 // 启动本地activity
-                startActivity(new Intent(MainActivity.this, SecondActivity.class));
+//                startActivity(new Intent(MainActivity.this, SecondActivity.class));
                 // 启动插件activity
-//                PluginPackage pluginPackage = ((App)getApplication()).getPluginPackage();
-//                PluginManager.getInstance(MainActivity.this).startPluginActivity(MainActivity.this, pluginPackage.packageInfo.packageName, "com.sample.plugina.MainActivity");
+                PluginPackage pluginPackage = ((App)getApplication()).getPluginPackage();
+                String defActivity = pluginPackage.packageInfo.applicationInfo.metaData.getString(Constans.DEFAULT_ACTIVITY);
+                if (!TextUtils.isEmpty(defActivity)) {
+                    PluginManager.getInstance(MainActivity.this).startPluginActivity(MainActivity.this, pluginPackage.packageInfo.packageName, defActivity);
+                }
             }
         });
     }
