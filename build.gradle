@@ -18,6 +18,12 @@ allprojects {
         google()
         jcenter()
     }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs.add('-Xbootclasspath/p:pluginLib\\libs\\androidstub.jar')
+        }
+    }
 }
 
 task clean(type: Delete) {

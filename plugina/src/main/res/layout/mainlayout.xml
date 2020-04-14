@@ -3,7 +3,18 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView android:layout_width="wrap_content"
+    <TextView android:id="@+id/tv"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="这是个插件第一个页面"/>
+
+    <Button android:id="@+id/btn_next"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="跳转到下个页面"/>
+
+    <Button android:id="@+id/btn_service"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="打开Service"/>
 </LinearLayout>

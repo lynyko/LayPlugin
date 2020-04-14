@@ -1,1 +1,1 @@
-include ':demo', ':pluginLib', ':plugina'
+include ':demo', ':pluginLib', ':plugina', ':androidstub', ':commonlib'

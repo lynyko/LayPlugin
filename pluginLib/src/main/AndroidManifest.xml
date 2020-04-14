@@ -2,6 +2,7 @@
     package="com.lay.pluge.pluginlib">
 
     <application>
-        <activity android:name=".PluginProxyActivity"/>
+        <activity android:name="com.lay.pluge.pluginlib.ProxyActivity"/>
+        <service android:name=".ProxyService"/>
     </application>
 </manifest>

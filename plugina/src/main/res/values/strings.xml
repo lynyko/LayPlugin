@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">PluginA</string>
+    <string name="name">PluginA</string>
+    <string name="tip">这是个插件第一个页面</string>
+    <string name="application">我是Application</string>
 </resources>
