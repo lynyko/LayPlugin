@@ -11,10 +11,12 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.text.TextUtils;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ public class PluginManager {
     public Map<String, PluginPackage> packageMap = new HashMap<>();
     private PluginManager(Context context){
         mContext = context;
-        hookInstrumentation();
     }
 
     public static PluginManager getInstance(Context context){
@@ -51,6 +52,10 @@ public class PluginManager {
         return pluginManager;
     }
 
+    public void init(){
+        hookInstrumentation();
+    }
+
     public PluginPackage loadApk(String path){
         PackageInfo packageInfo = mContext.getPackageManager().getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS | PackageManager.GET_SERVICES);
 
@@ -60,7 +65,15 @@ public class PluginManager {
         Resources resources = new Resources(assetManager, mContext.getResources().getDisplayMetrics(),
                 mContext.getResources().getConfiguration());
 
-        PluginPackage pluginPackage = new PluginPackage(dexClassLoader, assetManager, resources, packageInfo);
+        List<PackageParser.Activity> receivers = new ArrayList<>();
+        try {
+            PackageParser parser = new PackageParser();
+            PackageParser.Package pkg = parser.parsePackage(new File(path), PackageParser.PARSE_MUST_BE_APK);
+            receivers = pkg.receivers;
+        } catch (PackageParser.PackageParserException e) {
+            e.printStackTrace();
+        }
+        PluginPackage pluginPackage = new PluginPackage(dexClassLoader, assetManager, resources, packageInfo, receivers);
         packageMap.put(packageInfo.packageName, pluginPackage);
         return pluginPackage;
     }
@@ -103,8 +116,8 @@ public class PluginManager {
             throw new IllegalArgumentException("can not find a plugin");
         }
 //        startApplicationIfNeed(pluginPackage);
-        launchActivity(context, pluginPackage);
         registerReceiverIfNeed(context, pluginPackage);
+        launchActivity(context, pluginPackage);
     }
 
     private void registerReceiverIfNeed(Context context, PluginPackage pluginPackage){
@@ -112,10 +125,12 @@ public class PluginManager {
             return;
         }
 
-        for(ActivityInfo receiver : pluginPackage.packageInfo.receivers){
+        for(PackageParser.Activity receiver : pluginPackage.receiversList){
             try {
-                BroadcastReceiver r = (BroadcastReceiver)pluginPackage.classLoader.loadClass(receiver.name).newInstance();
-//                context.registerReceiver(r, receiver.applicationInfo.)
+                BroadcastReceiver r = (BroadcastReceiver)pluginPackage.classLoader.loadClass(receiver.getComponentName().getClassName()).newInstance();
+                for (PackageParser.ActivityIntentInfo aii : receiver.intents) {
+                    context.registerReceiver(r, aii);
+                }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (IllegalAccessException e) {

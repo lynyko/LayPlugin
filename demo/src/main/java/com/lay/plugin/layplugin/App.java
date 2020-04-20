@@ -11,11 +11,11 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        String dexPath = Environment.getExternalStorageDirectory() + "/plugina-debug.apk";
-        pluginPackage =  PluginManager.getInstance(this).loadApk(dexPath);
+//        String dexPath = Environment.getExternalStorageDirectory() + "/plugina-debug.apk";
+        PluginManager.getInstance(this).init();
     }
 
-    public PluginPackage getPluginPackage(){
-        return pluginPackage;
-    }
+//    public PluginPackage getPluginPackage(){
+//        return pluginPackage;
+//    }
 }
